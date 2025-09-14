@@ -6,7 +6,9 @@ rules:
     verbs: ["create", "delete", "update", "patch", "get", "list"]
     resources:
       - group: ""
-        resources: ["pods", "secrets", "configmaps", "serviceaccounts", "roles", "rolebindings"]
+        resources: ["pods", "secrets", "configmaps", "serviceaccounts"]
+      - group: "rbac.authorization.k8s.io"
+        resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
 
   # 2. Все SubjectAccessReview (полная проверка команд типа 'kubectl auth can-i')
   - level: RequestResponse
@@ -28,10 +30,7 @@ rules:
     resources:
       - group: ""
         resources: ["pods"]
-    # Используем `namespaces: ["*"]` и фильтр по полю securityContext
-    # В Kubernetes audit-policy нет нативного fieldSelector, 
-    # но вы будете видеть полный pod манифест в RequestResponse,
-    # где можно анализировать securityContext.privileged и runAsUser: 0
+    # В RequestResponse будет весь Pod spec → сможешь анализировать securityContext
 
   # 5. Все остальные ресурсы — хотя бы метаданные
   - level: Metadata
