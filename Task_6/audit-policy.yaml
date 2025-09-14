@@ -1,0 +1,39 @@
+apiVersion: audit.k8s.io/v1
+kind: Policy
+rules:
+  # 1. Все действия с критическими ресурсами (полный запрос/ответ)
+  - level: RequestResponse
+    verbs: ["create", "delete", "update", "patch", "get", "list"]
+    resources:
+      - group: ""
+        resources: ["pods", "secrets", "configmaps", "serviceaccounts"]
+      - group: "rbac.authorization.k8s.io"
+        resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
+
+  # 2. Все SubjectAccessReview (полная проверка команд типа 'kubectl auth can-i')
+  - level: RequestResponse
+    verbs: ["create"]
+    resources:
+      - group: "authorization.k8s.io"
+        resources: ["subjectaccessreviews"]
+
+  # 3. Все exec, attach и portforward на подах
+  - level: RequestResponse
+    verbs: ["create"]
+    resources:
+      - group: ""
+        resources: ["pods/exec", "pods/attach", "pods/portforward"]
+
+  # 4. Логирование создания привилегированных подов и контейнеров с root
+  - level: RequestResponse
+    verbs: ["create", "update"]
+    resources:
+      - group: ""
+        resources: ["pods"]
+    # В RequestResponse будет весь Pod spec → сможешь анализировать securityContext
+
+  # 5. Все остальные ресурсы — хотя бы метаданные
+  - level: Metadata
+    resources:
+      - group: ""
+        resources: ["*"]

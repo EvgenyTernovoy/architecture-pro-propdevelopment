@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: devops-access
+  namespace: development-tenant
+subjects:
+- kind: Group
+  name: devops-group
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: devops-role
+  apiGroup: rbac.authorization.k8s.io 
